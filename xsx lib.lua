@@ -62,7 +62,9 @@ end
 
 -- Remove the old library
 if _G.DepsoGUI then
-	_G.DepsoGUI:Remove()
+	pcall(function()
+		_G.DepsoGUI:Remove()
+	end)
 end
 _G.DepsoGUI = library
 
