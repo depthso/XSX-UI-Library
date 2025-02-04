@@ -57,7 +57,7 @@ local library = {
 	darkGray = Color3.fromRGB(27, 27, 27),
 	lightGray = Color3.fromRGB(48, 48, 48),
 
-	Font = Enum.Font.SourceSans,
+	Font = Enum.Font.Code,
 
 	rainbowColors = ColorSequence.new{
 		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(241, 137, 53)), 
@@ -407,7 +407,7 @@ function library:Init(Config)
 		waterText.BackgroundTransparency = 1.000
 		waterText.Position = UDim2.new(0, 0, -0.0416666679, 0)
 		waterText.Size = UDim2.new(0, 0, 0, 24)
-		waterText.Font = Enum.Font.Code
+		waterText.Font = library.Font
 		waterText.Text = text
 		waterText.TextColor3 = Color3.fromRGB(198, 198, 198)
 		waterText.TextTransparency = 1
@@ -558,7 +558,7 @@ function library:Init(Config)
 		notifText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		notifText.BackgroundTransparency = 1.000
 		notifText.Size = UDim2.new(0, 230, 0, 26)
-		notifText.Font = Enum.Font.Code
+		notifText.Font = library.Font
 		notifText.Text = text
 		notifText.TextColor3 = Color3.fromRGB(198, 198, 198)
 		notifText.TextSize = 14.000
@@ -862,7 +862,7 @@ function library:Init(Config)
 	company.LayoutOrder = 1
 	company.AutomaticSize = Enum.AutomaticSize.X
 	company.Size = UDim2.new(0, 0, 1, 0)
-	company.Font = Enum.Font.Code
+	company.Font = library.Font
 	company.TextColor3 = library.companyColor
 	company.TextSize = 16.000
 	company.TextTransparency = 0.300
@@ -880,7 +880,7 @@ function library:Init(Config)
 	headerLabel.BackgroundTransparency = 1.000
 	headerLabel.LayoutOrder = 2
 	headerLabel.Size = UDim2.new(1, 0, 1, 0)
-	headerLabel.Font = Enum.Font.Code
+	headerLabel.Font = library.Font
 	headerLabel.Text = library.title
 	headerLabel.TextColor3 = Color3.fromRGB(198, 198, 198)
 	headerLabel.TextSize = 16.000
@@ -939,7 +939,7 @@ function library:Init(Config)
 	panic.BackgroundColor3 = library.darkGray
 	panic.Position = UDim2.new(0, 10, 1, -10)
 	panic.Size = UDim2.new(0, 152, 0, 24)
-	panic.Font = Enum.Font.Code
+	panic.Font = library.Font
 	panic.TextColor3 = Color3.fromRGB(190, 190, 190)
 	panic.TextSize = 14.000
 	panic.Activated:Connect(function()
@@ -1006,7 +1006,7 @@ function library:Init(Config)
 		tabButton.Position = UDim2.new(-0.0281690136, 0, 0, 0)
 		tabButton.Size = UDim2.new(0, 150, 0, 22)
 		tabButton.AutoButtonColor = false
-		tabButton.Font = Enum.Font.Code
+		tabButton.Font = library.Font
 		tabButton.Text = title
 		tabButton.TextColor3 = Color3.fromRGB(170, 170, 170)
 		tabButton.TextSize = 15.000
@@ -1077,7 +1077,7 @@ function library:Init(Config)
 			label.BackgroundTransparency = 1.000
 			label.Position = UDim2.new(0.00499999989, 0, 0, 0)
 			label.Size = UDim2.new(0, 396, 0, 24)
-			label.Font = Enum.Font.Code
+			label.Font = library.Font
 			label.Text = text
 			label.TextColor3 = Color3.fromRGB(190, 190, 190)
 			label.TextSize = 14.000
@@ -1252,7 +1252,7 @@ function library:Init(Config)
 			sectionLabel.ClipsDescendants = true
 			sectionLabel.Position = UDim2.new(0.0252525248, 0, 0.020833334, 0)
 			sectionLabel.Size = UDim2.new(1, 0, 1, 0)
-			sectionLabel.Font = Enum.Font.Code
+			sectionLabel.Font = library.Font
 			sectionLabel.LineHeight = 1
 			sectionLabel.Text = text
 			sectionLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
@@ -1312,7 +1312,7 @@ function library:Init(Config)
 			toggleButton.BackgroundTransparency = 1.000
 			toggleButton.ClipsDescendants = false
 			toggleButton.Size = UDim2.new(0, 396, 0, 22)
-			toggleButton.Font = Enum.Font.Code
+			toggleButton.Font = library.Font
 			toggleButton.Text = ""
 			toggleButton.TextColor3 = Color3.fromRGB(190, 190, 190)
 			toggleButton.TextSize = 14.000
@@ -1348,7 +1348,7 @@ function library:Init(Config)
 			toggleLabel.BackgroundTransparency = 1.000
 			toggleLabel.Position = UDim2.new(0.0454545468, 0, 0, 0)
 			toggleLabel.Size = UDim2.new(0, 377, 0, 22)
-			toggleLabel.Font = Enum.Font.Code
+			toggleLabel.Font = library.Font
 			toggleLabel.LineHeight = 1.150
 			toggleLabel.Text = text
 			toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
@@ -1516,7 +1516,7 @@ function library:Init(Config)
 				keybindButtonLabel.ClipsDescendants = true
 				keybindButtonLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 				keybindButtonLabel.Size = UDim2.new(0, 85, 0, 20)
-				keybindButtonLabel.Font = Enum.Font.Code
+				keybindButtonLabel.Font = library.Font
 				keybindButtonLabel.Text = ". . ."
 				keybindButtonLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 				keybindButtonLabel.TextSize = 14.000
@@ -1678,7 +1678,7 @@ function library:Init(Config)
 			keybindLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			keybindLabel.BackgroundTransparency = 1.000
 			keybindLabel.Size = UDim2.new(0, 396, 0, 24)
-			keybindLabel.Font = Enum.Font.Code
+			keybindLabel.Font = library.Font
 			keybindLabel.Text = text
 			keybindLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 			keybindLabel.TextSize = 14.000
@@ -1735,7 +1735,7 @@ function library:Init(Config)
 			keybindButtonLabel.ClipsDescendants = true
 			keybindButtonLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
 			keybindButtonLabel.Size = UDim2.new(0, 85, 0, 20)
-			keybindButtonLabel.Font = Enum.Font.Code
+			keybindButtonLabel.Font = library.Font
 			keybindButtonLabel.Text = ". . ."
 			keybindButtonLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 			keybindButtonLabel.TextSize = 14.000
@@ -1880,7 +1880,7 @@ function library:Init(Config)
 			textboxLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			textboxLabel.BackgroundTransparency = 1.000
 			textboxLabel.Size = UDim2.new(1, 0, 0, 24)
-			textboxLabel.Font = Enum.Font.Code
+			textboxLabel.Font = library.Font
 			textboxLabel.Text = text
 			textboxLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 			textboxLabel.TextSize = 14.000
@@ -1911,7 +1911,7 @@ function library:Init(Config)
 			textBoxValues.BorderSizePixel = 0
 			textBoxValues.ClipsDescendants = true
 			textBoxValues.Size = UDim2.new(1, 0, 1, 0)
-			textBoxValues.Font = Enum.Font.Code
+			textBoxValues.Font = library.Font
 			textBoxValues.PlaceholderColor3 = Color3.fromRGB(140, 140, 140)
 			textBoxValues.PlaceholderText = placeHolder
 			textBoxValues.Text = default
@@ -2018,7 +2018,7 @@ function library:Init(Config)
 			selectorLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			selectorLabel.BackgroundTransparency = 1.000
 			selectorLabel.Size = UDim2.new(0, 396, 0, 24)
-			selectorLabel.Font = Enum.Font.Code
+			selectorLabel.Font = library.Font
 			selectorLabel.Text = text
 			selectorLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 			selectorLabel.TextSize = 14.000
@@ -2069,7 +2069,7 @@ function library:Init(Config)
 			selectorText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 			selectorText.BackgroundTransparency = 1.000
 			selectorText.Size = UDim2.new(0, 394, 0, 20)
-			selectorText.Font = Enum.Font.Code
+			selectorText.Font = library.Font
 			selectorText.LineHeight = 1.150
 			selectorText.TextColor3 = Color3.fromRGB(160, 160, 160)
 			selectorText.TextSize = 14.000
@@ -2143,7 +2143,7 @@ function library:Init(Config)
 				optionButton.BackgroundTransparency = 1.000
 				optionButton.Size = UDim2.new(0, 394, 0, 20)
 				optionButton.AutoButtonColor = false
-				optionButton.Font = Enum.Font.Code
+				optionButton.Font = library.Font
 				optionButton.Text = v
 				optionButton.TextColor3 = Color3.fromRGB(160, 160, 160)
 				optionButton.TextSize = 14.000
@@ -2206,7 +2206,7 @@ function library:Init(Config)
 				optionButton.BackgroundTransparency = 1.000
 				optionButton.Size = UDim2.new(0, 394, 0, 20)
 				optionButton.AutoButtonColor = false
-				optionButton.Font = Enum.Font.Code
+				optionButton.Font = library.Font
 				optionButton.Text = new
 				optionButton.TextColor3 = Color3.fromRGB(140, 140, 140)
 				optionButton.TextSize = 14.000
@@ -2394,7 +2394,7 @@ function library:Init(Config)
 			sliderLabel.Parent = sliderFrame
 			sliderLabel.BackgroundTransparency = 1.000
 			sliderLabel.Size = UDim2.new(0, 396, 0, 24)
-			sliderLabel.Font = Enum.Font.Code
+			sliderLabel.Font = library.Font
 			sliderLabel.Text = text
 			sliderLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 			sliderLabel.TextSize = 14.000
@@ -2413,7 +2413,7 @@ function library:Init(Config)
 			sliderValue.BackgroundTransparency = 1.000
 			sliderValue.Position = UDim2.new(0.577319562, 0, 0, 0)
 			sliderValue.Size = UDim2.new(0, 169, 0, 15)
-			sliderValue.Font = Enum.Font.Code
+			sliderValue.Font = library.Font
 			sliderValue.Text = values.default or ""
 			sliderValue.TextColor3 = Color3.fromRGB(140, 140, 140)
 			sliderValue.TextSize = 14.000
