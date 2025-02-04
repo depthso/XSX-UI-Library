@@ -9,28 +9,37 @@
 
 local CloneRef = cloneref or function(a)return a end
 
+--// Service handlers
+local Services = setmetatable({}, {
+	__index = function(self, Name: string)
+		local Service = game:GetService(Name)
+		return CloneRef(Service)
+	end,
+})
+
 -- / Locals
-local Workspace = CloneRef(game:GetService("Workspace"))
-local Player = CloneRef(game:GetService("Players").LocalPlayer)
+local Player = Services.Players.LocalPlayer
 local Mouse = CloneRef(Player:GetMouse())
 
 -- / Services
-local UserInputService = CloneRef(game:GetService("UserInputService"))
-local TextService = CloneRef(game:GetService("TextService"))
-local TweenService = CloneRef(game:GetService("TweenService"))
-local RunService = CloneRef(game:GetService("RunService"))
-local CoreGui = RunService:IsStudio() and CloneRef(Player:WaitForChild("PlayerGui")) or CloneRef(game:GetService("CoreGui"))
-local TeleportService = CloneRef(game:GetService("TeleportService"))
-local Workspace = CloneRef(game:GetService("Workspace"))
-local CurrentCam = workspace.CurrentCamera
+local UserInputService = Services.UserInputService
+local TextService = Services.TextService
+local TweenService =Services.TweenService
+local RunService = Services.RunService
+local CoreGui = RunService:IsStudio() and CloneRef(Player:WaitForChild("PlayerGui")) or Services.CoreGui
+local TeleportService = Services.TeleportService
+local Workspace = Services.Workspace
+local CurrentCam = Workspace.CurrentCamera
+
 local hiddenUI = get_hidden_gui or gethui or function(a)return CoreGui end
 
 -- / Defaults 
 local OptionStates = {} -- Used for panic
 local library = {
-	title = "Bozo",
+	title = "Bozo depso",
 	company = "Company",
-
+	
+	RainbowEnabled = true,
 	BlurEffect = true,
 	BlurSize = 24,
 	FieldOfView = CurrentCam.FieldOfView,
@@ -40,11 +49,14 @@ local library = {
 	Debug = true,
 
 	-- / Elements Config
+	transparency = 0,
+	backgroundColor = Color3.fromRGB(31, 31, 31),
 	headerColor = Color3.fromRGB(255, 255, 255),
 	companyColor = Color3.fromRGB(163, 151, 255),
 	acientColor = Color3.fromRGB(167, 154, 121),
 	darkGray = Color3.fromRGB(27, 27, 27),
-	
+	lightGray = Color3.fromRGB(48, 48, 48),
+
 	Font = Enum.Font.SourceSans,
 
 	rainbowColors = ColorSequence.new{
@@ -60,7 +72,7 @@ local function Warn(...)
 	warn("Depso:", ...)
 end
 
--- Remove the old library
+-- / Remove the previous interface
 if _G.DepsoGUI then
 	pcall(function()
 		_G.DepsoGUI:Remove()
@@ -86,7 +98,7 @@ function TweenWrapper:Init()
 		__index = function(_, Key)
 			local Value = self.RealStyles[Key]
 			if not Value then
-				Warn(("No Tween style for %s, returning default"):format(Key))
+				Warn(`No Tween style for {Key}, returning default`)
 				return self.RealStyles.Default
 			end
 			return Value
@@ -122,28 +134,39 @@ local function EnableDrag(obj, latency)
 	local input = nil
 	local start = nil
 	local startPos = obj.Position
+	
+	local function InputIsAccepted(Input)
+		local UserInputType = Input.UserInputType
+		
+		if UserInputType == Enum.UserInputType.Touch then return true end
+		if UserInputType == Enum.UserInputType.MouseButton1 then return true end
+		
+		return false
+	end
 
-	obj.InputBegan:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-			toggled = true
-			start = inp.Position
-			startPos = obj.Position
-			inp.Changed:Connect(function()
-				if inp.UserInputState == Enum.UserInputState.End then
-					toggled = false
-				end
-			end)
-		end
+	obj.InputBegan:Connect(function(Input)
+		if not InputIsAccepted(Input) then return end
+		
+		toggled = true
+		start = Input.Position
+		startPos = obj.Position
+		
+		Input.Changed:Connect(function()
+			if Input.UserInputState == Enum.UserInputState.End then
+				toggled = false
+			end
+		end)
 	end)
 
-	obj.InputChanged:Connect(function(inp)
-		if inp.UserInputType == Enum.UserInputType.MouseMovement then
-			input = inp
-		end
+	obj.InputChanged:Connect(function(Input)
+		local MouseMovement = Input.UserInputType == Enum.UserInputType.MouseMovement
+		if not MouseMovement and not InputIsAccepted(Input) then return end 
+		
+		input = Input
 	end)
 
-	UserInputService.InputChanged:Connect(function(inp)
-		if inp == input and toggled then
+	UserInputService.InputChanged:Connect(function(Input)
+		if Input == input and toggled then
 			local Delta = input.Position - start
 			local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
 			TweenService:Create(obj, TweenInfo.new(latency), {Position = Position}):Play()
@@ -278,6 +301,9 @@ end
 TweenWrapper:CreateStyle("Rainbow", 5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
 function library:ApplyRainbow(instance, Wave)
 	local Colors = library.rainbowColors
+	local RainbowEnabled = library.RainbowEnabled
+	
+	if not RainbowEnabled then return end
 
 	if not Wave then
 		instance.BackgroundColor3 = Colors.Keypoints[1].Value
@@ -306,7 +332,7 @@ function library:Init(Config)
 	for Key, Value in next, Config do
 		library[Key] = Value
 	end
-	
+
 	local watermark = Instance.new("ScreenGui", CoreGui)
 	watermark.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -338,7 +364,7 @@ function library:Init(Config)
 
 		edge.Parent = watermark
 		edge.AnchorPoint = Vector2.new(0.5, 0.5)
-		edge.BackgroundColor3 = library.darkGray
+		edge.BackgroundColor3 = library.backgroundColor
 		edge.Position = UDim2.new(0.5, 0, -0.03, 0)
 		edge.Size = UDim2.new(0, 0, 0, 26)
 		edge.BackgroundTransparency = 1
@@ -483,7 +509,7 @@ function library:Init(Config)
 		local notifPadding = Instance.new("UIPadding")
 		local backgroundLayout = Instance.new("UIListLayout")
 
-		edge.BackgroundColor3 = library.darkGray
+		edge.BackgroundColor3 = library.backgroundColor
 		edge.BackgroundTransparency = 1.000
 		edge.Size = UDim2.new(0, 0, 0, 26)
 
@@ -765,7 +791,6 @@ function library:Init(Config)
 		TweenService:Create(IntroStroke, TweenWrapper.Styles["introduction end"], {Transparency = 1}):Play()
 	end
 
-
 	----/// UI INIT
 	local screen = Instance.new("ScreenGui", hiddenUI())
 	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -774,11 +799,18 @@ function library:Init(Config)
 	background.Visible = false
 	background.BorderSizePixel = 0
 	background.AnchorPoint = Vector2.new(0.5, 0.5)
-	background.BackgroundColor3 = Color3.fromRGB(31, 31, 31)
+	background.BackgroundTransparency = library.transparency
+	background.BackgroundColor3 = library.backgroundColor
 	background.Position = UDim2.new(0.5, 0, 0.5, 0)
-	background.Size = UDim2.new(0, 594, 0, 406)
+	--background.Size = UDim2.fromScale(0.5, 0.5)
+	background.Size = UDim2.fromOffset(594, 406)
 	background.ClipsDescendants = true
 	EnableDrag(background, 0.1)
+	
+	local SizeConstraint = Instance.new("UISizeConstraint")
+	SizeConstraint.Parent = background
+	SizeConstraint.MaxSize = Vector2.new(594, 406)
+	SizeConstraint.MinSize = Vector2.new(450, 300)
 
 	--/ Style
 	local BGStroke = Instance.new("UIStroke", background)
@@ -789,7 +821,6 @@ function library:Init(Config)
 	local BGGradient = Instance.new("UIGradient", background)
 	BGGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(230, 230, 230))}
 	BGGradient.Rotation = 90
-
 
 	--/ Tabs
 	local tabButtons = Instance.new("Frame", background)
@@ -810,7 +841,6 @@ function library:Init(Config)
 
 	local tabButtonCorner_2 = Instance.new("UICorner", tabButtons)
 	tabButtonCorner_2.CornerRadius = UDim.new(0, 2)
-
 
 	--/ Header
 	local container = Instance.new("Frame", background)
@@ -888,7 +918,7 @@ function library:Init(Config)
 
 	local tabButtonsOutline = Instance.new("UIStroke", tabButtons)
 	tabButtonsOutline.Thickness = 1
-	tabButtonsOutline.Color = Color3.fromRGB(48, 48, 48)
+	tabButtonsOutline.Color = library.lightGray
 
 	local tabButtonsGradient = Instance.new("UIGradient", tabButtons)
 	tabButtonsGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(34, 34, 34)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(28, 28, 28))}
@@ -900,11 +930,12 @@ function library:Init(Config)
 
 	local tabButtonsOutline = Instance.new("UIStroke", container)
 	tabButtonsOutline.Thickness = 1
-	tabButtonsOutline.Color = Color3.fromRGB(48, 48, 48)
+	tabButtonsOutline.Color = library.lightGray
 
 	local panic = Instance.new("TextButton", background)
 	panic.Text = "Panic"
 	panic.AnchorPoint = Vector2.new(0, 1)
+	panic.BackgroundTransparency = library.transparency
 	panic.BackgroundColor3 = library.darkGray
 	panic.Position = UDim2.new(0, 10, 1, -10)
 	panic.Size = UDim2.new(0, 152, 0, 24)
@@ -921,7 +952,7 @@ function library:Init(Config)
 	local panicOutline = Instance.new("UIStroke", panic)
 	panicOutline.Thickness = 1
 	panicOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	panicOutline.Color = Color3.fromRGB(48, 48, 48)
+	panicOutline.Color = library.lightGray
 
 	--delay(1, function()
 	--	library:Notify("Keybind set to ".. library.Key.Name, 20, "success")
@@ -930,23 +961,28 @@ function library:Init(Config)
 	UserInputService.InputBegan:Connect(function(input) -- Toggle UI
 		if input.KeyCode ~= library.Key then return end
 
-		local Enb = not background.Visible
-		background.Visible = Enb
-
-		if library.BlurEffect or Blur.Size > 0 then
-			TweenService:Create(Blur, TweenInfo.new(Enb and 0.5 or 0.3), {
-				Size = Enb and library.BlurSize or 0
-			}):Play()
-			TweenService:Create(CurrentCam, TweenInfo.new(Enb and 0.5 or 0.3), {
-				FieldOfView = Enb and library.FieldOfView-12 or library.FieldOfView
-			}):Play()
-		end
+		local Visible = not background.Visible
+		library:ShowUI(Visible)
 	end)
 
-	function library:ShowUI()
-		background.Visible = true
-		Blur.Size = 0
-		CurrentCam.FieldOfView = library.FieldOfView
+	function library:ShowUI(Visible: boolean)
+		local FieldOfView = library.FieldOfView
+		local BlurSize = library.BlurSize
+		local BlurEffect = library.BlurEffect
+
+		local Tweeninfo = TweenInfo.new(Visible and 0.5 or 0.3)
+
+		background.Visible = Visible
+		
+		if BlurEffect then
+			TweenService:Create(Blur, Tweeninfo, {
+				Size = Visible and BlurSize or 0
+			}):Play()
+			TweenService:Create(CurrentCam, Tweeninfo, {
+				FieldOfView = Visible and FieldOfView-12 or FieldOfView
+			}):Play()
+		end
+
 		return self
 	end
 
@@ -982,10 +1018,10 @@ function library:Init(Config)
 		page.BackgroundTransparency = 1.000
 		page.BorderSizePixel = 0
 		page.Size = UDim2.new(0, 412, 0, 358)
-		page.BottomImage = "http://www.roblox.com/asset/?id=3062506202"
-		page.MidImage = "http://www.roblox.com/asset/?id=3062506202"
+		page.BottomImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
+		page.MidImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
 		page.ScrollBarThickness = 1
-		page.TopImage = "http://www.roblox.com/asset/?id=3062506202"
+		page.TopImage = "rbxasset://textures/ui/Scroll/scroll-middle.png"
 		page.ScrollBarImageColor3 = library.acientColor
 		page.Visible = false
 		page.CanvasSize = UDim2.new(0,0,0,0)
@@ -1063,7 +1099,7 @@ function library:Init(Config)
 				label.TextXAlignment = Enum.TextXAlignment.Right
 			end
 
-			
+
 
 			local LabelFunctions = {}
 			function LabelFunctions:SetText(text)
@@ -1079,13 +1115,13 @@ function library:Init(Config)
 
 			function LabelFunctions:Hide()
 				label.Visible = false
-				
+
 				return self
 			end
 
 			function LabelFunctions:Show()
 				label.Visible = true
-				
+
 				return self
 			end
 
@@ -1117,6 +1153,7 @@ function library:Init(Config)
 			button.Text = text
 			button.Parent = page
 			button.BackgroundColor3 = Color
+			button.BackgroundTransparency = library.transparency
 			button.Size = UDim2.new(0, 396, 0, 24)
 			button.AutoButtonColor = false
 			button.Font = library.Font
@@ -1124,7 +1161,7 @@ function library:Init(Config)
 			button.TextSize = 14
 
 			buttonStroke.Thickness = 1
-			buttonStroke.Color = Color3.fromRGB(48, 48, 48)
+			buttonStroke.Color = library.lightGray
 			buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 			buttonCorner.CornerRadius = UDim.new(0, 2)
@@ -1188,7 +1225,7 @@ function library:Init(Config)
 			local sectionLayout = Instance.new("UIListLayout")
 			local sectionLabel = Instance.new("TextLabel")
 			local sectionPadding = Instance.new("UIPadding", sectionFrame)
-			
+
 			local UICorner = Instance.new("UICorner", sectionFrame)
 			UICorner.CornerRadius = UDim.new(0, 3)
 
@@ -1197,7 +1234,7 @@ function library:Init(Config)
 			sectionFrame.BorderSizePixel = 0
 			sectionFrame.ClipsDescendants = true
 			sectionFrame.Size = UDim2.new(0, 396, 0, 19)
-			
+
 			sectionPadding.PaddingBottom = UDim.new(0, 6)
 			sectionPadding.PaddingLeft = UDim.new(0, 3)
 			sectionPadding.PaddingRight = UDim.new(0, 3)
@@ -1222,7 +1259,7 @@ function library:Init(Config)
 			sectionLabel.TextSize = 14.000
 			sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
 			sectionLabel.RichText = true
-			
+
 
 			local NewSectionSize = TextService:GetTextSize(sectionLabel.Text, sectionLabel.TextSize, sectionLabel.Font, Vector2.new(math.huge,math.huge))
 			sectionLabel.Size = UDim2.new(0, NewSectionSize.X, 0, 18)
@@ -1288,17 +1325,18 @@ function library:Init(Config)
 
 			toggle.Parent = toggleButton
 			toggle.BackgroundColor3 = library.darkGray
+			toggle.BackgroundTransparency = library.transparency
 			toggle.Size = UDim2.new(0, 18, 0, 18)
 
 			toggleStroke.Thickness = 1
-			toggleStroke.Color = Color3.fromRGB(48, 48, 48)
+			toggleStroke.Color = library.lightGray
 
 			toggleCorner.CornerRadius = UDim.new(0, 2)
 			toggleCorner.Parent = toggle
 
 			toggleDesign.Parent = toggle
 			toggleDesign.AnchorPoint = Vector2.new(0.5, 0.5)
-			toggleDesign.BackgroundColor3 = Color3.fromRGB(161, 107, 255)
+			toggleDesign.BackgroundColor3 = library.acientColor
 			toggleDesign.BackgroundTransparency = 1.000
 			toggleDesign.Position = UDim2.new(0.5, 0, 0.5, 0)
 
@@ -1423,7 +1461,7 @@ function library:Init(Config)
 				callback_t = new
 				return ToggleFunctions
 			end
-			
+
 
 			function ToggleFunctions:AddKeybind(default_t)
 				callback_t = callback
@@ -1432,17 +1470,26 @@ function library:Init(Config)
 				end
 
 				local keybind = Instance.new("TextButton")
+				local keybindOutline = Instance.new("UIStroke")
 				local keybindCorner = Instance.new("UICorner")
 				local keybindBackground = Instance.new("Frame")
-				local keybindGradient = Instance.new("UIGradient")
 				local keybindBackCorner = Instance.new("UICorner")
 				local keybindButtonLabel = Instance.new("TextLabel")
 				local keybindLabelStraint = Instance.new("UISizeConstraint")
 				local keybindBackgroundStraint = Instance.new("UISizeConstraint")
 				local keybindStraint = Instance.new("UISizeConstraint")
+				
+				keybindOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+				keybindOutline.Thickness = 1
+				keybindOutline.Parent = keybind
+				keybindOutline.Color = library.lightGray
+				
+				keybindCorner.CornerRadius = UDim.new(0, 2)
+				keybindCorner.Parent = keybind
 
 				keybind.Parent = Extras
-				keybind.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+				keybind.BackgroundTransparency = library.transparency
+				keybind.BackgroundColor3 = library.darkGray
 				keybind.Position = UDim2.new(0.780303001, 0, 0, 0)
 				keybind.Size = UDim2.new(0, 87, 0, 22)
 				keybind.AutoButtonColor = false
@@ -1452,18 +1499,12 @@ function library:Init(Config)
 				keybind.TextSize = 14.000
 				keybind.Active = false
 
-				keybindCorner.CornerRadius = UDim.new(0, 2)
-				keybindCorner.Parent = keybind
-
 				keybindBackground.Parent = keybind
 				keybindBackground.AnchorPoint = Vector2.new(0.5, 0.5)
-				keybindBackground.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				keybindBackground.BackgroundTransparency = 1 --library.transparency
+				keybindBackground.BackgroundColor3 = library.darkGray
 				keybindBackground.Position = UDim2.new(0.5, 0, 0.5, 0)
 				keybindBackground.Size = UDim2.new(0, 85, 0, 20)
-
-				keybindGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(34, 34, 34)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(28, 28, 28))}
-				keybindGradient.Rotation = 90
-				keybindGradient.Parent = keybindBackground
 
 				keybindBackCorner.CornerRadius = UDim.new(0, 2)
 				keybindBackCorner.Parent = keybindBackground
@@ -1510,7 +1551,7 @@ function library:Init(Config)
 				end
 				keybindButtonLabel:GetPropertyChangedSignal("Text"):Connect(ResizeKeybind)
 				ResizeKeybind()
-				
+
 
 				local ChosenKey = default_t and default_t.Name
 
@@ -1764,7 +1805,7 @@ function library:Init(Config)
 				end)
 			end
 
-			
+
 
 			local KeybindFunctions = {}
 			function KeybindFunctions:Fire()
@@ -1853,13 +1894,14 @@ function library:Init(Config)
 
 			textbox.Parent = textboxFrame
 			textbox.BackgroundColor3 = library.darkGray
+			textbox.BackgroundTransparency = library.transparency
 			textbox.BorderSizePixel = 0
 			textbox.Position = UDim2.new(0, 0, 0, 24)
 			textbox.Size = UDim2.new(1, 0, 1, -24)
 
 			local textboxOutline = Instance.new("UIStroke", textbox)
 			textboxOutline.Thickness = 1
-			textboxOutline.Color = Color3.fromRGB(48, 48, 48)
+			textboxOutline.Color = library.lightGray
 
 			local UICorner = Instance.new("UICorner", textbox)
 			UICorner.CornerRadius = UDim.new(0, 2)
@@ -1886,7 +1928,7 @@ function library:Init(Config)
 			textBoxValuesPadding.PaddingTop = UDim.new(0, 4)
 
 			TweenWrapper:CreateStyle("TextBox", 0.07)
-			
+
 
 			textBoxValues.FocusLost:Connect(function(enterPressed)
 				if autoexec or enterPressed then
@@ -1996,6 +2038,7 @@ function library:Init(Config)
 
 			selector.Parent = selectorFrame
 			selector.BackgroundColor3 = library.darkGray
+			selector.BackgroundTransparency = library.transparency
 			selector.ClipsDescendants = true
 			selector.Position = UDim2.new(0, 0, 0.0926640928, 0)
 			selector.Size = UDim2.new(1, 0, 0, 23)
@@ -2017,6 +2060,7 @@ function library:Init(Config)
 
 			selectorTwo.Parent = selector
 			selectorTwo.BackgroundColor3 = library.darkGray
+			selectorTwo.BackgroundTransparency = library.transparency
 			selectorTwo.ClipsDescendants = true
 			selectorTwo.Position = UDim2.new(0.00252525252, 0, 0, 0)
 			selectorTwo.Size = UDim2.new(1, -2, 1, -1)
@@ -2079,7 +2123,7 @@ function library:Init(Config)
 			selectorTwoLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
 
 			TweenWrapper:CreateStyle("selector", 0.08)
-			
+
 
 			local Amount = #list
 			local Val = (Amount * 20)
@@ -2121,11 +2165,11 @@ function library:Init(Config)
 
 				Size = Val + 2
 
-				
+
 				checkSizes()
 			end
 
-			
+
 			local SelectorFunctions = {}
 			local AddAmount = 0
 
@@ -2185,7 +2229,7 @@ function library:Init(Config)
 				checkSizes()
 				Size = (Val + AddAmount) + 2
 
-				
+
 				checkSizes()
 				return self
 			end
@@ -2210,7 +2254,7 @@ function library:Init(Config)
 					selectorText.Text = ". . ."
 				end
 
-				
+
 				checkSizes()
 				return self
 			end
@@ -2294,6 +2338,7 @@ function library:Init(Config)
 
 			sliderButton.Parent = sliderFolder
 			sliderButton.BackgroundColor3 = library.darkGray
+			sliderButton.BackgroundTransparency = library.transparency
 			sliderButton.Position = UDim2.new(0.348484844, 0, 0.600000024, 0)
 			sliderButton.Size = UDim2.new(0, 394, 0, 16)
 			sliderButton.AutoButtonColor = false
@@ -2307,6 +2352,7 @@ function library:Init(Config)
 
 			sliderBackground.Parent = sliderButton
 			sliderBackground.BackgroundColor3 = library.darkGray
+			sliderBackground.BackgroundTransparency = library.transparency
 			sliderBackground.Size = UDim2.new(0, 392, 0, 14)
 			sliderBackground.Position = UDim2.new(0, 2, 0, 0)
 			sliderBackground.ClipsDescendants = true
@@ -2439,7 +2485,7 @@ function library:Init(Config)
 				UpdateSlider()
 			end)
 
-			
+
 
 			local SliderFunctions = {}
 			OptionStates[sliderButton] = {values.default, SliderFunctions}
@@ -2530,11 +2576,12 @@ function library:Init(Config)
 			rightBar.Name = "rightBar"
 			rightBar.Parent = sectionFrame
 			rightBar.BackgroundColor3 = library.darkGray
+			rightBar.BackgroundTransparency = library.transparency
 			rightBar.BorderSizePixel = 0
 			rightBar.Position = UDim2.new(0.308080822, 0, 0.479166657, 0)
 			rightBar.Size = UDim2.new(0, 403, 0, 1)
 
-			
+
 
 			local SeperatorFunctions = {}
 			function SeperatorFunctions:Hide()
@@ -2609,7 +2656,7 @@ function library:Init(Config)
 		return self
 	end
 
-	
+
 	return library
 end
 
