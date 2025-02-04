@@ -866,6 +866,7 @@ function library:Init(Config)
 	company.TextColor3 = library.companyColor
 	company.TextSize = 16.000
 	company.TextTransparency = 0.300
+ company.RichText = true
 	company.TextXAlignment = Enum.TextXAlignment.Left
 
 	function library:SetCompany(text)
@@ -882,6 +883,7 @@ function library:Init(Config)
 	headerLabel.Size = UDim2.new(1, 0, 1, 0)
 	headerLabel.Font = library.Font
 	headerLabel.Text = library.title
+ headerLabel.RichText = true
 	headerLabel.TextColor3 = Color3.fromRGB(198, 198, 198)
 	headerLabel.TextSize = 16.000
 	headerLabel.TextXAlignment = Enum.TextXAlignment.Left
