@@ -1292,306 +1292,89 @@ function library:Init(Config)
 			return SectionFunctions
 		end
 
-		function Components:NewToggle(text, default, callback, loop, ignorepanic)
-			text = text or "toggle"
-			default = default or false
-			callback = callback or function() end
+function Components:NewToggle(text, default, callback, loop, ignorepanic)
+    text = text or "toggle"
+    default = default or false
+    callback = callback or function() end
 
-			local toggleButton = Instance.new("TextButton", page)
-			local toggleLayout = Instance.new("UIListLayout")
+    local toggleButton = Instance.new("TextButton", page)
+    local toggleLayout = Instance.new("UIListLayout")
+    local toggle = Instance.new("Frame")
+    local toggleCorner = Instance.new("UICorner")
+    local toggleDesign = Instance.new("Frame")
+    local toggleDesignCorner = Instance.new("UICorner")
+    local toggleStroke = Instance.new("UIStroke", toggle)
+    local toggleLabel = Instance.new("TextLabel")
+    local toggleLabelPadding = Instance.new("UIPadding")
+    
+    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    toggleButton.BackgroundTransparency = 1.000
+    toggleButton.Size = UDim2.new(0, 396, 0, 22)
+    toggleButton.Text = ""
 
-			local toggle = Instance.new("Frame")
-			local toggleCorner = Instance.new("UICorner")
-			local toggleDesign = Instance.new("Frame")
-			local toggleDesignCorner = Instance.new("UICorner")
-			local toggleStroke = Instance.new("UIStroke", toggle)
-			local toggleLabel = Instance.new("TextLabel")
-			local toggleLabelPadding = Instance.new("UIPadding")
-			local Extras = Instance.new("Folder")
-			local ExtrasLayout = Instance.new("UIListLayout")
+    toggle.Parent = toggleButton
+    toggle.BackgroundColor3 = library.darkGray
+    toggle.Size = UDim2.new(0, 18, 0, 18)
+    toggleCorner.CornerRadius = UDim.new(0, 2)
+    toggleCorner.Parent = toggle
+    
+    toggleStroke.Thickness = 1
+    toggleStroke.Color = library.lightGray
+    toggleStroke.Parent = toggle
 
-			toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			toggleButton.BackgroundTransparency = 1.000
-			toggleButton.ClipsDescendants = false
-			toggleButton.Size = UDim2.new(0, 396, 0, 22)
-			toggleButton.Font = library.Font
-			toggleButton.Text = ""
-			toggleButton.TextColor3 = Color3.fromRGB(190, 190, 190)
-			toggleButton.TextSize = 14.000
-			toggleButton.TextXAlignment = Enum.TextXAlignment.Left
+    toggleDesign.Parent = toggle
+    toggleDesign.AnchorPoint = Vector2.new(0.5, 0.5)
+    toggleDesign.BackgroundColor3 = library.acientColor
+    toggleDesign.Position = UDim2.new(0.5, 0, 0.5, 0)
+    toggleDesignCorner.CornerRadius = UDim.new(0, 2)
+    toggleDesignCorner.Parent = toggleDesign
 
-			toggleLayout.Parent = toggleButton
-			toggleLayout.FillDirection = Enum.FillDirection.Horizontal
-			toggleLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			toggleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    toggleLabel.Parent = toggleButton
+    toggleLabel.Size = UDim2.new(0, 377, 0, 22)
+    toggleLabel.Text = text
+    toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
 
-			toggle.Parent = toggleButton
-			toggle.BackgroundColor3 = library.darkGray
-			toggle.BackgroundTransparency = library.transparency
-			toggle.Size = UDim2.new(0, 18, 0, 18)
+    local on = default
+    local function updateToggle()
+        local newSize = on and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
+        local newTransparency = on and 0 or 1
+        local newColor = on and Color3.fromRGB(50, 200, 100) or library.acientColor
+        
+        TweenService:Create(toggleDesign, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Size = newSize, BackgroundTransparency = newTransparency, BackgroundColor3 = newColor
+        }):Play()
+        callback(on)
+    end
+    
+    toggleButton.MouseEnter:Connect(function()
+        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(210, 210, 210)}):Play()
+    end)
+    
+    toggleButton.MouseLeave:Connect(function()
+        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(190, 190, 190)}):Play()
+    end)
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        on = not on
+        updateToggle()
+    end)
+    
+    updateToggle()
+    
+    return {
+        SetText = function(_, newText)
+            toggleLabel.Text = newText
+        end,
+        Set = function(_, state)
+            on = state
+            updateToggle()
+        end,
+        GetValue = function()
+            return on
+        end
+    }
+end
 
-			toggleStroke.Thickness = 1
-			toggleStroke.Color = library.lightGray
-
-			toggleCorner.CornerRadius = UDim.new(0, 2)
-			toggleCorner.Parent = toggle
-
-			toggleDesign.Parent = toggle
-			toggleDesign.AnchorPoint = Vector2.new(0.5, 0.5)
-			toggleDesign.BackgroundColor3 = library.acientColor
-			toggleDesign.BackgroundTransparency = 1.000
-			toggleDesign.Position = UDim2.new(0.5, 0, 0.5, 0)
-
-			toggleDesignCorner.CornerRadius = UDim.new(0, 2)
-			toggleDesignCorner.Parent = toggleDesign
-
-			toggleLabel.Parent = toggleButton
-			toggleLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			toggleLabel.BackgroundTransparency = 1.000
-			toggleLabel.Position = UDim2.new(0.0454545468, 0, 0, 0)
-			toggleLabel.Size = UDim2.new(0, 377, 0, 22)
-			toggleLabel.Font = library.Font
-			toggleLabel.LineHeight = 1.150
-			toggleLabel.Text = text
-			toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
-			toggleLabel.TextSize = 14.000
-			toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-			toggleLabel.RichText = true
-
-			toggleLabelPadding.Parent = toggleLabel
-			toggleLabelPadding.PaddingLeft = UDim.new(0, 6)
-
-			Extras.Parent = toggleButton
-
-			ExtrasLayout.Parent = Extras
-			ExtrasLayout.FillDirection = Enum.FillDirection.Horizontal
-			ExtrasLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-			ExtrasLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			ExtrasLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-			ExtrasLayout.Padding = UDim.new(0, 2)
-
-			local NewToggleLabelSize = TextService:GetTextSize(toggleLabel.Text, toggleLabel.TextSize, toggleLabel.Font, Vector2.new(math.huge,math.huge))
-			toggleLabel.Size = UDim2.new(0, NewToggleLabelSize.X + 6, 0, 22)
-
-			toggleButton.MouseEnter:Connect(function()
-				TweenService:Create(toggleLabel, TweenWrapper.Styles["hover"], {TextColor3 = Color3.fromRGB(210, 210, 210)}):Play()
-			end)
-			toggleButton.MouseLeave:Connect(function()
-				TweenService:Create(toggleLabel, TweenWrapper.Styles["hover"], {TextColor3 = Color3.fromRGB(190, 190, 190)}):Play()
-			end)
-
-			TweenWrapper:CreateStyle("toggle_form", 0.13)
-			local On = default
-			if default then
-				On = true
-			else
-				On = false
-			end
-
-			if loop ~= nil then
-				RunService.RenderStepped:Connect(function()
-					if On == true then
-						callback(On)
-					end
-				end)
-			end
-
-			toggleButton.MouseButton1Click:Connect(function()
-				On = not On
-				local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-				local Transparency = On and 0 or 1
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {Size = SizeOn}):Play()
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {BackgroundTransparency = Transparency}):Play()
-				callback(On)
-			end)
-
-			local ToggleFunctions = {}
-
-			if not ignorepanic then
-				OptionStates[toggleButton] = {false, ToggleFunctions}
-			end
-
-			function ToggleFunctions:SetText(new)
-				new = new or text
-				toggleLabel.Text = new
-				return self
-			end
-
-			function ToggleFunctions:Hide()
-				toggleButton.Visible = false
-				return self
-			end
-
-			function ToggleFunctions:Show()
-				toggleButton.Visible = true
-				return self
-			end   
-
-			function ToggleFunctions:Change()
-				On = not On
-				local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-				local Transparency = On and 0 or 1
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {Size = SizeOn}):Play()
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {BackgroundTransparency = Transparency}):Play()
-				callback(On)
-				return self
-			end
-
-			function ToggleFunctions:Remove()
-				toggleButton:Destroy()
-				return self
-			end
-
-			function ToggleFunctions:Set(state)
-				On = state
-				local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-				local Transparency = On and 0 or 1
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {Size = SizeOn}):Play()
-				TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {BackgroundTransparency = Transparency}):Play()
-				callback(On)
-				return ToggleFunctions
-			end
-
-			function ToggleFunctions:GetValue()
-				return On
-			end
-
-			local callback_t
-			function ToggleFunctions:SetFunction(new)
-				new = new or function() end
-				callback = new
-				callback_t = new
-				return ToggleFunctions
-			end
-
-
-			function ToggleFunctions:AddKeybind(default_t)
-				callback_t = callback
-				if default_t == Enum.KeyCode.Backspace then
-					default_t = nil
-				end
-
-				local keybind = Instance.new("TextButton")
-				local keybindOutline = Instance.new("UIStroke")
-				local keybindCorner = Instance.new("UICorner")
-				local keybindBackground = Instance.new("Frame")
-				local keybindBackCorner = Instance.new("UICorner")
-				local keybindButtonLabel = Instance.new("TextLabel")
-				local keybindLabelStraint = Instance.new("UISizeConstraint")
-				local keybindBackgroundStraint = Instance.new("UISizeConstraint")
-				local keybindStraint = Instance.new("UISizeConstraint")
-				
-				keybindOutline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-				keybindOutline.Thickness = 1
-				keybindOutline.Parent = keybind
-				keybindOutline.Color = library.lightGray
-				
-				keybindCorner.CornerRadius = UDim.new(0, 2)
-				keybindCorner.Parent = keybind
-
-				keybind.Parent = Extras
-				keybind.BackgroundTransparency = library.transparency
-				keybind.BackgroundColor3 = library.darkGray
-				keybind.Position = UDim2.new(0.780303001, 0, 0, 0)
-				keybind.Size = UDim2.new(0, 87, 0, 22)
-				keybind.AutoButtonColor = false
-				keybind.Font = library.Font
-				keybind.Text = ""
-				keybind.TextColor3 = Color3.fromRGB(0, 0, 0)
-				keybind.TextSize = 14.000
-				keybind.Active = false
-
-				keybindBackground.Parent = keybind
-				keybindBackground.AnchorPoint = Vector2.new(0.5, 0.5)
-				keybindBackground.BackgroundTransparency = 1 --library.transparency
-				keybindBackground.BackgroundColor3 = library.darkGray
-				keybindBackground.Position = UDim2.new(0.5, 0, 0.5, 0)
-				keybindBackground.Size = UDim2.new(0, 85, 0, 20)
-
-				keybindBackCorner.CornerRadius = UDim.new(0, 2)
-				keybindBackCorner.Parent = keybindBackground
-
-				keybindButtonLabel.Parent = keybindBackground
-				keybindButtonLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-				keybindButtonLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				keybindButtonLabel.BackgroundTransparency = 1.000
-				keybindButtonLabel.ClipsDescendants = true
-				keybindButtonLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
-				keybindButtonLabel.Size = UDim2.new(0, 85, 0, 20)
-				keybindButtonLabel.Font = library.Font
-				keybindButtonLabel.Text = ". . ."
-				keybindButtonLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
-				keybindButtonLabel.TextSize = 14.000
-				keybindButtonLabel.RichText = true
-
-				keybindLabelStraint.Parent = keybindButtonLabel
-				keybindLabelStraint.MinSize = Vector2.new(28, 20)
-
-				keybindBackgroundStraint.Parent = keybindBackground
-				keybindBackgroundStraint.MinSize = Vector2.new(28, 20)
-
-				keybindStraint.Parent = keybind
-				keybindStraint.MinSize = Vector2.new(30, 22)
-
-				local Shortcuts = {
-					Return = "enter"
-				}
-
-				keybindButtonLabel.Text = default_t and (Shortcuts[default_t.Name] or default_t.Name) or "None"
-				TweenWrapper:CreateStyle("keybind", 0.08)
-
-				local NewKeybindSize = TextService:GetTextSize(keybindButtonLabel.Text, keybindButtonLabel.TextSize, keybindButtonLabel.Font, Vector2.new(math.huge,math.huge))
-				keybindButtonLabel.Size = UDim2.new(0, NewKeybindSize.X + 6, 0, 20)
-				keybindBackground.Size = UDim2.new(0, NewKeybindSize.X + 6, 0, 20)
-				keybind.Size = UDim2.new(0, NewKeybindSize.X + 8, 0, 22)
-
-				local function ResizeKeybind()
-					NewKeybindSize = TextService:GetTextSize(keybindButtonLabel.Text, keybindButtonLabel.TextSize, keybindButtonLabel.Font, Vector2.new(math.huge,math.huge))
-					TweenService:Create(keybindButtonLabel, TweenWrapper.Styles["keybind"], {Size = UDim2.new(0, NewKeybindSize.X + 6, 0, 20)}):Play()
-					TweenService:Create(keybindBackground, TweenWrapper.Styles["keybind"], {Size = UDim2.new(0, NewKeybindSize.X + 6, 0, 20)}):Play()
-					TweenService:Create(keybind, TweenWrapper.Styles["keybind"], {Size = UDim2.new(0, NewKeybindSize.X + 8, 0, 22)}):Play()
-				end
-				keybindButtonLabel:GetPropertyChangedSignal("Text"):Connect(ResizeKeybind)
-				ResizeKeybind()
-
-
-				local ChosenKey = default_t and default_t.Name
-
-				keybind.MouseButton1Click:Connect(function()
-					keybindButtonLabel.Text = ". . ."
-					local InputWait = UserInputService.InputBegan:wait()
-					if not UserInputService.WindowFocused then return end 
-
-					if InputWait == Enum.KeyCode.Backspace then
-						default_t = nil
-						ChosenKey = nil
-						keybindButtonLabel.Text = "None"
-						return
-					end
-
-					if InputWait.KeyCode.Name ~= "Unknown" then
-						local Result = Shortcuts[InputWait.KeyCode.Name] or InputWait.KeyCode.Name
-						keybindButtonLabel.Text = Result
-						ChosenKey = InputWait.KeyCode.Name
-					end
-				end)
-
-				--local ChatTextBox = Player.PlayerGui.Chat.Frame.ChatBarParentFrame.Frame.BoxFrame.Frame.ChatBar
-				if UserInputService.WindowFocused then
-					UserInputService.InputBegan:Connect(function(c, p)
-						if not p and default_t and ChosenKey then
-							if c.KeyCode.Name == ChosenKey then --  and not ChatTextBox:IsFocused()
-								On = not On
-								local SizeOn = On and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-								local Transparency = On and 0 or 1
-								TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {Size = SizeOn}):Play()
-								TweenService:Create(toggleDesign, TweenWrapper.Styles["toggle_form"], {BackgroundTransparency = Transparency}):Play()
-								callback_t(On)
-								return
-							end
-						end
-					end)
-				end
 
 				local ExtraKeybindFunctions = {}
 				function ExtraKeybindFunctions:SetKey(new)
