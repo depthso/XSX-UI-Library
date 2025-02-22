@@ -24,7 +24,7 @@ local Mouse = CloneRef(Player:GetMouse())
 -- / Services
 local UserInputService = Services.UserInputService
 local TextService = Services.TextService
-local TweenService =Services.TweenService
+local TweenService = game:GetService("TweenService")
 local RunService = Services.RunService
 local CoreGui = RunService:IsStudio() and CloneRef(Player:WaitForChild("PlayerGui")) or Services.CoreGui
 local TeleportService = Services.TeleportService
@@ -1292,89 +1292,99 @@ function library:Init(Config)
 			return SectionFunctions
 		end
 
-function Components:NewToggle(text, default, callback, loop, ignorepanic)
-    text = text or "toggle"
-    default = default or false
-    callback = callback or function() end
-
-    local toggleButton = Instance.new("TextButton", page)
-    local toggleLayout = Instance.new("UIListLayout")
-    local toggle = Instance.new("Frame")
-    local toggleCorner = Instance.new("UICorner")
-    local toggleDesign = Instance.new("Frame")
-    local toggleDesignCorner = Instance.new("UICorner")
-    local toggleStroke = Instance.new("UIStroke", toggle)
-    local toggleLabel = Instance.new("TextLabel")
-    local toggleLabelPadding = Instance.new("UIPadding")
-    
-    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    toggleButton.BackgroundTransparency = 1.000
-    toggleButton.Size = UDim2.new(0, 396, 0, 22)
-    toggleButton.Text = ""
-
-    toggle.Parent = toggleButton
-    toggle.BackgroundColor3 = library.darkGray
-    toggle.Size = UDim2.new(0, 18, 0, 18)
-    toggleCorner.CornerRadius = UDim.new(0, 2)
-    toggleCorner.Parent = toggle
-    
-    toggleStroke.Thickness = 1
-    toggleStroke.Color = library.lightGray
-    toggleStroke.Parent = toggle
-
-    toggleDesign.Parent = toggle
-    toggleDesign.AnchorPoint = Vector2.new(0.5, 0.5)
-    toggleDesign.BackgroundColor3 = library.acientColor
-    toggleDesign.Position = UDim2.new(0.5, 0, 0.5, 0)
-    toggleDesignCorner.CornerRadius = UDim.new(0, 2)
-    toggleDesignCorner.Parent = toggleDesign
-
-    toggleLabel.Parent = toggleButton
-    toggleLabel.Size = UDim2.new(0, 377, 0, 22)
-    toggleLabel.Text = text
-    toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
-
-    local on = default
-    local function updateToggle()
-        local newSize = on and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
-        local newTransparency = on and 0 or 1
-        local newColor = on and Color3.fromRGB(50, 200, 100) or library.acientColor
-        
-        TweenService:Create(toggleDesign, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = newSize, BackgroundTransparency = newTransparency, BackgroundColor3 = newColor
-        }):Play()
-        callback(on)
-    end
-    
-    toggleButton.MouseEnter:Connect(function()
-        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(210, 210, 210)}):Play()
-    end)
-    
-    toggleButton.MouseLeave:Connect(function()
-        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(190, 190, 190)}):Play()
-    end)
-    
-    toggleButton.MouseButton1Click:Connect(function()
-        on = not on
-        updateToggle()
-    end)
-    
-    updateToggle()
-    
-    return {
-        SetText = function(_, newText)
-            toggleLabel.Text = newText
-        end,
-        Set = function(_, state)
-            on = state
-            updateToggle()
-        end,
-        GetValue = function()
-            return on
-        end
-    }
-end
-
+				function Components:NewToggle(text, default, callback, loop, ignorepanic)
+				    local TweenService = game:GetService("TweenService")
+				
+				    text = text or "toggle"
+				    default = default or false
+				    callback = callback or function() end
+				
+				    if not page then
+				        warn("Page is nil, cannot create toggle button.")
+				        return
+				    end
+				
+				    if not library then
+				        warn("Library is nil, using default colors.")
+				        library = {
+				            darkGray = Color3.fromRGB(50, 50, 50),
+				            lightGray = Color3.fromRGB(200, 200, 200),
+				            acientColor = Color3.fromRGB(150, 150, 150)
+				        }
+				    end
+				
+				    local toggleButton = Instance.new("TextButton")
+				    toggleButton.Parent = page
+				    toggleButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				    toggleButton.BackgroundTransparency = 1.000
+				    toggleButton.Size = UDim2.new(0, 396, 0, 22)
+				    toggleButton.Text = ""
+				
+				    local toggle = Instance.new("Frame", toggleButton)
+				    toggle.BackgroundColor3 = library.darkGray
+				    toggle.Size = UDim2.new(0, 18, 0, 18)
+				
+				    local toggleCorner = Instance.new("UICorner", toggle)
+				    toggleCorner.CornerRadius = UDim.new(0, 2)
+				
+				    local toggleStroke = Instance.new("UIStroke", toggle)
+				    toggleStroke.Thickness = 1
+				    toggleStroke.Color = library.lightGray
+				
+				    local toggleDesign = Instance.new("Frame", toggle)
+				    toggleDesign.AnchorPoint = Vector2.new(0.5, 0.5)
+				    toggleDesign.BackgroundColor3 = library.acientColor
+				    toggleDesign.Position = UDim2.new(0.5, 0, 0.5, 0)
+				
+				    local toggleDesignCorner = Instance.new("UICorner", toggleDesign)
+				    toggleDesignCorner.CornerRadius = UDim.new(0, 2)
+				
+				    local toggleLabel = Instance.new("TextLabel", toggleButton)
+				    toggleLabel.Size = UDim2.new(0, 377, 0, 22)
+				    toggleLabel.Text = text
+				    toggleLabel.TextColor3 = Color3.fromRGB(190, 190, 190)
+				
+				    local on = default
+				    local function updateToggle()
+				        local newSize = on and UDim2.new(0, 12, 0, 12) or UDim2.new(0, 0, 0, 0)
+				        local newTransparency = on and 0 or 1
+				        local newColor = on and Color3.fromRGB(50, 200, 100) or library.acientColor
+				        
+				        TweenService:Create(toggleDesign, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+				            Size = newSize, BackgroundTransparency = newTransparency, BackgroundColor3 = newColor
+				        }):Play()
+				
+				        callback(on)
+				    end
+				
+				    toggleButton.MouseEnter:Connect(function()
+				        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(210, 210, 210)}):Play()
+				    end)
+				
+				    toggleButton.MouseLeave:Connect(function()
+				        TweenService:Create(toggleLabel, TweenInfo.new(0.1), {TextColor3 = Color3.fromRGB(190, 190, 190)}):Play()
+				    end)
+				
+				    toggleButton.MouseButton1Click:Connect(function()
+				        on = not on
+				        updateToggle()
+				    end)
+				
+				    updateToggle()
+				
+				    return {
+				        SetText = function(_, newText)
+				            toggleLabel.Text = newText
+				        end,
+				        Set = function(_, state)
+				            on = state
+				            updateToggle()
+				        end,
+				        GetValue = function()
+				            return on
+				        end
+				    }
+				end
 
 				local ExtraKeybindFunctions = {}
 				function ExtraKeybindFunctions:SetKey(new)
